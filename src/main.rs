@@ -1,6 +1,7 @@
 use bevy::{
     prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle}, window::WindowResolution,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+    window::WindowResolution,
 };
 use rand::prelude::*;
 
@@ -42,7 +43,7 @@ fn setup(
     commands.insert_resource(RectangleColorMaterial(rectangle_material_handle.clone()));
     commands.insert_resource(ColorTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
     commands.insert_resource(BlockSpawnTimer(Timer::from_seconds(
-        2.0,
+        0.01,
         TimerMode::Repeating,
     )));
 }
@@ -78,16 +79,14 @@ fn spawn_blocks_periodically(
     mut block_timer: ResMut<BlockSpawnTimer>,
 ) {
     block_timer.0.tick(time.delta());
-    let x_transform: f32 = rand::thread_rng().gen_range(-100.0..100.0);
+    let x_transform: f32 = rand::thread_rng().gen_range(-1000.0..1000.0);
     if block_timer.0.just_finished() {
         println!("Spawning a block!");
         println!("{x_transform}");
         commands.spawn(MaterialMesh2dBundle {
             mesh: block_mesh.0.clone(),
             material: block_color.0.clone(),
-            transform: Transform::from_xyz(
-            x_transform,
-            100.0, 0.0),
+            transform: Transform::from_xyz(x_transform, x_transform, 0.0),
             ..default()
         });
     }
@@ -96,16 +95,13 @@ fn spawn_blocks_periodically(
 fn main() {
     println!("Tetris Clone");
     App::new()
-        .add_plugins(DefaultPlugins.set(
-            WindowPlugin {
-                primary_window: Some(Window {
-                    resolution: WindowResolution::new(1500.0, 1500.0),
-                    ..default()
-                }),
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: WindowResolution::new(150.0, 150.0).with_scale_factor_override(1.0),
                 ..default()
-            }
-        )
-        )
+            }),
+            ..default()
+        }))
         .add_systems(Startup, setup)
         .add_systems(Update, change_rectangle_color_periodically)
         .add_systems(Update, spawn_blocks_periodically)
