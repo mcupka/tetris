@@ -41,7 +41,7 @@ fn setup(
 
     // Create mesh resources
     let rectangle_mesh_handle = meshes.add(Rectangle {
-        half_size: [50.0, 50.0].into(),
+        half_size: [25.0, 25.0].into(),
     });
     // Create color material resource
     let rectangle_material_handle = materials.add(Color::rgba(0.8, 0.1, 0.1, 1.0));
@@ -84,28 +84,75 @@ fn change_rectangle_color_periodically(
 
 // Periodically spawn blocks
 fn spawn_blocks_periodically(
-    mut commands: Commands,
+    commands: Commands,
     block_color: Res<RectangleColorMaterial>,
     block_mesh: Res<RectangleMesh>,
     time: Res<Time>,
     mut block_timer: ResMut<BlockSpawnTimer>,
 ) {
     block_timer.0.tick(time.delta());
-    let x_transform: f32 = rand::thread_rng().gen_range(-250.0..250.0);
     if block_timer.0.just_finished() {
-        println!("Spawning a block!");
-        println!("{x_transform}");
-        commands.spawn((
-            MaterialMesh2dBundle {
-                mesh: block_mesh.0.clone(),
-                material: block_color.0.clone(),
-                transform: Transform::from_xyz(x_transform, 300.0, 0.0),
-                ..default()
-            },
-            Block,
-            Falling,
-        ));
+        let block_type: i8 = rand::thread_rng().gen_range(0..2);
+        if block_type == 0 {
+            spawn_single_cube(commands, block_color, block_mesh);
+        }
+        else if block_type == 1 {
+            spawn_double_cube(commands, block_color, block_mesh);
+        }
+        println!("{block_type}");
     }
+}
+
+fn spawn_single_cube(
+    mut commands: Commands,
+    block_color: Res<RectangleColorMaterial>,
+    block_mesh: Res<RectangleMesh>,
+) {
+    let mut x_transform: f32 = rand::thread_rng().gen_range(-250.0..250.0);
+    x_transform -= x_transform % 50.0;
+    println!("Spawning a block!");
+    println!("{x_transform}");
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: block_mesh.0.clone(),
+            material: block_color.0.clone(),
+            transform: Transform::from_xyz(x_transform, 300.0, 0.0),
+            ..default()
+        },
+        Block,
+        Falling,
+    ));
+}
+
+fn spawn_double_cube(
+    mut commands: Commands,
+    block_color: Res<RectangleColorMaterial>,
+    block_mesh: Res<RectangleMesh>,
+) {
+    let mut x_transform: f32 = rand::thread_rng().gen_range(-250.0..200.0);
+    x_transform -= x_transform % 50.0;
+    println!("Spawning a block!");
+    println!("{x_transform}");
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: block_mesh.0.clone(),
+            material: block_color.0.clone(),
+            transform: Transform::from_xyz(x_transform, 300.0, 0.0),
+            ..default()
+        },
+        Block,
+        Falling,
+    ));
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: block_mesh.0.clone(),
+            material: block_color.0.clone(),
+            transform: Transform::from_xyz(x_transform + 50.0, 300.0, 0.0),
+            ..default()
+        },
+        Block,
+        Falling,
+    ));
 }
 
 // Gravity for blocks
@@ -130,16 +177,18 @@ fn move_blocks_down(
                     transform_other.translation.x,
                     transform.translation.y,
                     transform_other.translation.y,
-                    100.0,
-                    100.0,
-                    100.0,
-                    100.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
                 );
-                if (x1 + w1 / 2.0 >= x2 - w2 / 2.0)
-                    && (x1 - w2 / 2.0 <= x2 + w2 / 2.0)
-                    && (y1 - h1 / 2.0 <= y2 + h2 / 2.0)
-                    && (y1 + h1 / 2.0 >= y2 - h2 / 2.0)
+                if (x1 + w1 / 2.0 >= x2 - w2 / 2.0 + 1.0)
+                    && (x1 - w2 / 2.0 <= x2 + w2 / 2.0 - 1.0)
+                    && (y1 - h1 / 2.0 <= y2 + h2 / 2.0 - 1.0)
+                    && (y1 + h1 / 2.0 >= y2 - h2 / 2.0 + 1.0)
+                    // 50, -150 <=> 0, -200 
                 {
+                    println!("{x1}, {y1} <=> {x2}, {y2}");
                     transform.translation.y = y2 + h2 / 2.0 + h1 / 2.0;
                     commands.entity(entity).remove::<Falling>();
                 }
@@ -155,13 +204,17 @@ fn process_user_input(
     if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
         println!("Left Arrow Just Pressed!");
             for (entity, mut transform) in falling_block_query.iter_mut() {
-            transform.translation.x -= 100.0;
+                if (transform.translation.x - 50.0) >= -250.0 {
+                    transform.translation.x -= 50.0;
+                }
         }
     }
     if keyboard_input.just_pressed(KeyCode::ArrowRight) {
         println!("Right Arrow Just Pressed!");
             for (entity, mut transform) in falling_block_query.iter_mut() {
-            transform.translation.x += 100.0;
+            if (transform.translation.x + 50.0) <= 250.0 {
+                transform.translation.x += 50.0;
+            }
         }
     }
     if keyboard_input.just_pressed(KeyCode::ArrowUp) {

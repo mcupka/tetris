@@ -9,7 +9,7 @@ Plan
 ☑    ☐    
 ☑ 1. Make a small rectangle appear on the screen    
 ☑ 2. Make a rectangle fall from the top of the screen to the bottom    
-☐ 3. Allow user to move it while it is in mid-air    
+☑ 3. Allow user to move it while it is in mid-air    
 ☑ 4. Make blocks drop repeatedly    
 ☑ 5. Make blocks collide with each other    
 ☐ 6. Create new block shapes    
@@ -41,10 +41,12 @@ Make blocks drop repeatedly
 ---------------------------
 spawn_blocks_periodically system uses BlockSpawnTimer to know when to spawn a
 new block
+randomly chooses block type to spawn, calls appropriate funciton 
 
 Make blocks collide with each other
 ------------------------------------
 Should switch to rapier for using more complex shapes
+For now, using multiple single blocks to make up complex blocks
 
 Create new block shapes
 -----------------------
