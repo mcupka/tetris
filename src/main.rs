@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2d, Mesh2dHandle},
     window::WindowResolution,
+    input::keyboard::*
 };
 use rand::prelude::*;
 
@@ -114,8 +115,6 @@ fn move_blocks_down(
     mut gravity_timer: ResMut<GravityTimer>,
     mut falling_block_query: Query<(Entity, &mut Transform), (With<Block>, With<Falling>)>,
     stationary_block_query: Query<&Transform, (With<Block>, Without<Falling>)>,
-    //TODO: make a new query without falling. Iterate over this for collision
-    // detection instead of using iter_combinations_mut()
 ) {
     gravity_timer.0.tick(time.delta());
     if gravity_timer.0.just_finished() {
@@ -148,6 +147,23 @@ fn move_blocks_down(
     }
 }
 
+fn process_user_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
+        println!("Left Arrow Just Pressed!");
+    }
+    if keyboard_input.just_pressed(KeyCode::ArrowRight) {
+        println!("Right Arrow Just Pressed!");
+    }
+    if keyboard_input.just_pressed(KeyCode::ArrowUp) {
+        println!("Up Arrow Just Pressed!");
+    }
+    if keyboard_input.just_pressed(KeyCode::ArrowDown) {
+        println!("Down Arrow Just Pressed!");
+    }
+}
+
 fn main() {
     println!("Tetris Clone");
     App::new()
@@ -162,5 +178,6 @@ fn main() {
         .add_systems(Update, change_rectangle_color_periodically)
         .add_systems(Update, spawn_blocks_periodically)
         .add_systems(Update, move_blocks_down)
+        .add_systems(Update, process_user_input)
         .run();
 }
