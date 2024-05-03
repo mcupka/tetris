@@ -138,6 +138,7 @@ fn move_blocks_down(
                 if (x1 + w1 / 2.0 >= x2 - w2 / 2.0)
                     && (x1 - w2 / 2.0 <= x2 + w2 / 2.0)
                     && (y1 - h1 / 2.0 <= y2 + h2 / 2.0)
+                    && (y1 + h1 / 2.0 >= y2 - h2 / 2.0)
                 {
                     transform.translation.y = y2 + h2 / 2.0 + h1 / 2.0;
                     commands.entity(entity).remove::<Falling>();
@@ -149,12 +150,19 @@ fn move_blocks_down(
 
 fn process_user_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut falling_block_query: Query<(Entity, &mut Transform), (With<Block>, With<Falling>)>,
 ) {
     if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
         println!("Left Arrow Just Pressed!");
+            for (entity, mut transform) in falling_block_query.iter_mut() {
+            transform.translation.x -= 100.0;
+        }
     }
     if keyboard_input.just_pressed(KeyCode::ArrowRight) {
         println!("Right Arrow Just Pressed!");
+            for (entity, mut transform) in falling_block_query.iter_mut() {
+            transform.translation.x += 100.0;
+        }
     }
     if keyboard_input.just_pressed(KeyCode::ArrowUp) {
         println!("Up Arrow Just Pressed!");
