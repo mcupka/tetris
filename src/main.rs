@@ -54,7 +54,7 @@ fn setup(
         TimerMode::Repeating,
     )));
     commands.insert_resource(BlockSpawnTimer(Timer::from_seconds(
-        0.5,
+        5.0,
         TimerMode::Repeating,
     )));
 }
@@ -90,7 +90,7 @@ fn spawn_blocks_periodically(
     mut block_timer: ResMut<BlockSpawnTimer>,
 ) {
     block_timer.0.tick(time.delta());
-    let x_transform: f32 = rand::thread_rng().gen_range(-1000.0..1000.0);
+    let x_transform: f32 = rand::thread_rng().gen_range(-250.0..250.0);
     if block_timer.0.just_finished() {
         println!("Spawning a block!");
         println!("{x_transform}");
@@ -120,8 +120,9 @@ fn move_blocks_down(
     gravity_timer.0.tick(time.delta());
     if gravity_timer.0.just_finished() {
         for (entity, mut transform) in falling_block_query.iter_mut() {
-            transform.translation.y -= 1.0;
+            transform.translation.y -= 3.0;
             if transform.translation.y <= -300.0 {
+                transform.translation.y = -300.0;
                 commands.entity(entity).remove::<Falling>();
             }
             for transform_other in stationary_block_query.iter() {
@@ -139,6 +140,7 @@ fn move_blocks_down(
                     && (x1 - w2 / 2.0 <= x2 + w2 / 2.0)
                     && (y1 - h1 / 2.0 <= y2 + h2 / 2.0)
                 {
+                    transform.translation.y = y2 + h2 / 2.0 + h1 / 2.0;
                     commands.entity(entity).remove::<Falling>();
                 }
             }
